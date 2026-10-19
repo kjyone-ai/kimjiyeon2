@@ -1,0 +1,28 @@
+*   65ccc5d merge: feature/crud 브랜치 병합 (수정/삭제/Top)
+|\  
+| * f6a6fb6 feat: 프롬프트 수정/삭제 및 조회수 Top 5 기능
+|/  
+*   044c01c merge: feature/persistence 브랜치 병합 (JSON/Markdown)
+|\  
+| * 74330dc feat: JSON 저장/불러오기 및 카테고리별 Markdown 내보내기
+|/  
+*   ab09490 merge: feature/favorites 브랜치 병합 (상세 보기/즐겨찾기)
+|\  
+| * 6437c1f feat: 상세 보기(조회수 기록) 및 즐겨찾기 추가/해제/목록 기능
+|/  
+*   9c582db merge: feature/search 브랜치 병합 (카테고리 조회/검색)
+|\  
+| * 9c2e1ea feat: 카테고리별 조회 및 제목/내용 키워드 검색 기능
+|/  
+*   0ea3889 merge: feature/prompt-list 브랜치 병합 (추가/목록)
+|\  
+| * 28ae2d7 feat: 프롬프트 추가 및 목록 출력 기능 (중복 제목 방지 포함)
+|/  
+* fff5b39 feat: 메뉴 반복 루프, 기본 데이터, 입력 검증 함수 추가
+* bb24b39 chore: 프로젝트 초기화 (.gitignore, README 제목)
+* claude/sleepy-lovelace-0eupzx
+  feature/crud
+  feature/favorites
+  feature/persistence
+  feature/prompt-list
+  feature/search

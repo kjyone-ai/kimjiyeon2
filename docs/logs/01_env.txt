@@ -1,0 +1,10 @@
+$ python3 --version
+Python 3.13.16
+
+$ git --version
+git version 2.43.0
+
+$ git config user.name
+kjyone-ai
+$ git config user.email
+kjyone@innoaca.kr
