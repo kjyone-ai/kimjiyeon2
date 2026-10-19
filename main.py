@@ -275,6 +275,100 @@ def show_favorites(prompts):
     print(f"\n총 {len(matches)}개의 즐겨찾기")
 
 
+DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prompts.json")
+EXPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "export")
+
+
+def normalize(item):
+    """JSON에서 읽은 항목에 빠진 필드를 기본값으로 채운다. 필수 필드가 없으면 None."""
+    if not isinstance(item, dict) or not item.get("title") or not item.get("content"):
+        return None
+    return {
+        "title": str(item["title"]),
+        "content": str(item["content"]),
+        "category": str(item.get("category") or "기타"),
+        "favorite": bool(item.get("favorite", False)),
+        "views": int(item.get("views", 0)),
+    }
+
+
+def load_prompts(path=DATA_FILE):
+    """JSON 파일에서 프롬프트를 읽는다. 파일이 없거나 깨졌으면 None을 반환한다."""
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        prompts = [normalize(item) for item in data]
+    except (OSError, ValueError, TypeError):
+        print("데이터 파일을 읽을 수 없어 기본 데이터를 사용합니다.")
+        return None
+    return [prompt for prompt in prompts if prompt is not None]
+
+
+def save_prompts(prompts, path=DATA_FILE):
+    """프롬프트를 JSON 파일로 저장한다. 성공 여부를 반환한다."""
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(prompts, f, ensure_ascii=False, indent=2)
+    except OSError as error:
+        print(f"저장에 실패했습니다: {error}")
+        return False
+    return True
+
+
+def save_menu(prompts):
+    """현재 데이터를 JSON 파일에 저장한다."""
+    print("\n=== JSON 저장 ===")
+    if save_prompts(prompts):
+        print(f"{len(prompts)}개의 프롬프트를 저장했습니다: {DATA_FILE}")
+
+
+def load_menu(prompts):
+    """JSON 파일의 데이터로 현재 목록을 교체한다."""
+    print("\n=== JSON 불러오기 ===")
+    loaded = load_prompts()
+    if loaded is None:
+        print("불러올 데이터가 없습니다. 먼저 저장해주세요.")
+        return
+    prompts[:] = loaded
+    print(f"{len(prompts)}개의 프롬프트를 불러왔습니다.")
+
+
+def export_markdown(prompts):
+    """카테고리별로 Markdown 파일(export/<카테고리>.md)을 만든다."""
+    print("\n=== Markdown 내보내기 ===")
+    if not prompts:
+        print("내보낼 프롬프트가 없습니다.")
+        return
+    os.makedirs(EXPORT_DIR, exist_ok=True)
+
+    count = 0
+    for category in get_all_categories(prompts):
+        group = [p for p in prompts if p["category"] == category]
+        if not group:
+            continue
+        lines = [f"# {category}", ""]
+        for prompt in group:
+            star = " ⭐" if prompt["favorite"] else ""
+            lines += [
+                f"## {prompt['title']}{star}",
+                "",
+                f"- 조회수: {prompt['views']}",
+                "",
+                prompt["content"],
+                "",
+            ]
+        # 파일명에 쓸 수 없는 문자(직접 입력한 카테고리)는 '_'로 바꾼다
+        safe_name = "".join("_" if ch in '\\/:*?"<>|' else ch for ch in category)
+        path = os.path.join(EXPORT_DIR, f"{safe_name}.md")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+        print(f"- {path} ({len(group)}개)")
+        count += 1
+    print(f"\n{count}개의 Markdown 파일을 내보냈습니다.")
+
+
 MENU_ITEMS = [
     ("1", "프롬프트 추가", add_prompt),
     ("2", "프롬프트 목록", show_list),
@@ -283,12 +377,21 @@ MENU_ITEMS = [
     ("5", "프롬프트 상세 보기", show_detail),
     ("6", "즐겨찾기 관리", toggle_favorite),
     ("7", "즐겨찾기 목록", show_favorites),
+    ("8", "JSON 저장", save_menu),
+    ("9", "JSON 불러오기", load_menu),
+    ("10", "Markdown 내보내기", export_markdown),
 ]
 
 
+# 실행 후 자동 저장이 필요한 메뉴 (추가, 상세 보기(조회수), 즐겨찾기, 수정, 삭제)
+MUTATING_MENUS = {"6", "1", "5"}
+
+
 def main():
-    # 기본 데이터를 복사해서 사용한다 (프로그램 실행 중에만 유지)
-    prompts = [dict(prompt) for prompt in DEFAULT_PROMPTS]
+    # 저장된 JSON이 있으면 불러오고, 없으면 기본 데이터를 복사해서 사용한다
+    prompts = load_prompts()
+    if prompts is None:
+        prompts = [dict(prompt) for prompt in DEFAULT_PROMPTS]
     actions = {key: func for key, _, func in MENU_ITEMS}
 
     while True:
@@ -300,6 +403,8 @@ def main():
             break
         if choice in actions:
             actions[choice](prompts)
+            if choice in MUTATING_MENUS:
+                save_prompts(prompts)
         else:
             print("잘못된 입력입니다. 메뉴에 있는 번호를 입력해주세요.")
 
