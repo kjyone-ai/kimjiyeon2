@@ -77,7 +77,83 @@ for _prompt in DEFAULT_PROMPTS:
     _prompt.setdefault("views", 0)
 
 
+def new_prompt(title, content, category):
+    """프롬프트 딕셔너리를 만든다. 즐겨찾기는 기본 해제, 조회수는 0이다."""
+    return {
+        "title": title,
+        "content": content,
+        "category": category,
+        "favorite": False,
+        "views": 0,
+    }
+
+
+def choose_category():
+    """미리 정의된 카테고리 중 하나를 고르거나 직접 입력받는다."""
+    custom_number = len(CATEGORIES) + 1
+    while True:
+        print("카테고리 선택:")
+        for number, category in enumerate(CATEGORIES, start=1):
+            print(f"{number}) {category}")
+        print(f"{custom_number}) 직접 입력")
+
+        number = input_number("선택: ", 1, custom_number)
+        if number is None:
+            continue
+        if number == custom_number:
+            return input_non_empty("카테고리 이름: ")
+        return CATEGORIES[number - 1]
+
+
+def title_exists(prompts, title, ignore=None):
+    """같은 제목(대소문자 무시)이 이미 있으면 True. ignore는 검사에서 제외할 프롬프트."""
+    return any(
+        p is not ignore and p["title"].lower() == title.lower() for p in prompts
+    )
+
+
+def input_unique_title(prompts, ignore=None):
+    """중복되지 않는 제목을 입력받는다. 중복이면 다시 입력받는다."""
+    while True:
+        title = input_non_empty("제목: ")
+        if not title_exists(prompts, title, ignore):
+            return title
+        print("이미 같은 제목의 프롬프트가 있습니다. 다른 제목을 입력해주세요.")
+
+
+def add_prompt(prompts):
+    """새 프롬프트를 입력받아 목록에 추가한다."""
+    print("\n=== 프롬프트 추가 ===")
+    title = input_unique_title(prompts)
+    content = input_non_empty("내용: ")
+    print()
+    category = choose_category()
+
+    prompts.append(new_prompt(title, content, category))
+    print("\n프롬프트가 추가되었습니다!")
+
+
+def print_prompt_line(number, prompt):
+    """'번호. [카테고리] 제목 ⭐' 형식으로 한 줄 출력한다."""
+    star = " ⭐" if prompt["favorite"] else ""
+    print(f"{number}. [{prompt['category']}] {prompt['title']}{star}")
+
+
+def show_list(prompts):
+    """저장된 모든 프롬프트를 번호와 함께 출력한다."""
+    print("\n=== 프롬프트 목록 ===")
+    if not prompts:
+        print("등록된 프롬프트가 없습니다. 먼저 프롬프트를 추가해주세요.")
+        return
+
+    for number, prompt in enumerate(prompts, start=1):
+        print_prompt_line(number, prompt)
+    print(f"\n총 {len(prompts)}개의 프롬프트")
+
+
 MENU_ITEMS = [
+    ("1", "프롬프트 추가", add_prompt),
+    ("2", "프롬프트 목록", show_list),
 ]
 
 
