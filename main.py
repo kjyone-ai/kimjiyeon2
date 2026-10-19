@@ -218,11 +218,71 @@ def search_prompt(prompts):
     print(f"\n{len(matches)}개의 프롬프트를 찾았습니다.")
 
 
+def select_prompt(prompts):
+    """번호를 입력받아 해당 프롬프트를 반환한다. 잘못된 번호면 None."""
+    if not prompts:
+        print("등록된 프롬프트가 없습니다.")
+        return None
+    number = input_number(f"번호 입력 (1~{len(prompts)}): ", 1, len(prompts))
+    if number is None:
+        return None
+    return prompts[number - 1]
+
+
+def show_detail(prompts):
+    """선택한 프롬프트의 전체 내용을 출력하고 조회수를 1 올린다."""
+    print("\n=== 프롬프트 상세 보기 ===")
+    prompt = select_prompt(prompts)
+    if prompt is None:
+        return
+
+    prompt["views"] = prompt.get("views", 0) + 1
+    line = "─" * 40
+    print()
+    print(line)
+    print(f"제목: {prompt['title']}")
+    print(f"카테고리: {prompt['category']}")
+    print(f"즐겨찾기: {'⭐' if prompt['favorite'] else '-'}")
+    print(f"조회수: {prompt['views']}")
+    print(line)
+    print("내용:")
+    print(prompt["content"])
+    print(line)
+
+
+def toggle_favorite(prompts):
+    """선택한 프롬프트의 즐겨찾기 상태를 추가/해제한다."""
+    print("\n=== 즐겨찾기 관리 ===")
+    prompt = select_prompt(prompts)
+    if prompt is None:
+        return
+
+    prompt["favorite"] = not prompt["favorite"]
+    if prompt["favorite"]:
+        print(f"'{prompt['title']}' 프롬프트를 즐겨찾기에 추가했습니다! ⭐")
+    else:
+        print(f"'{prompt['title']}' 프롬프트를 즐겨찾기에서 해제했습니다.")
+
+
+def show_favorites(prompts):
+    """즐겨찾기된 프롬프트만 모아서 출력한다."""
+    print("\n=== 즐겨찾기 목록 ===")
+    matches = find_prompts(prompts, lambda prompt: prompt["favorite"])
+    if not matches:
+        print("즐겨찾기한 프롬프트가 없습니다. (즐겨찾기 관리 메뉴에서 추가할 수 있습니다)")
+        return
+    print_matches(matches)
+    print(f"\n총 {len(matches)}개의 즐겨찾기")
+
+
 MENU_ITEMS = [
     ("1", "프롬프트 추가", add_prompt),
     ("2", "프롬프트 목록", show_list),
     ("3", "카테고리별 조회", show_by_category),
     ("4", "프롬프트 검색", search_prompt),
+    ("5", "프롬프트 상세 보기", show_detail),
+    ("6", "즐겨찾기 관리", toggle_favorite),
+    ("7", "즐겨찾기 목록", show_favorites),
 ]
 
 
