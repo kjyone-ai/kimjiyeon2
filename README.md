@@ -75,6 +75,20 @@ prompts = [
 | 저장/내보내기 | `load_prompts()`, `save_prompts()`, `export_markdown()` | JSON, Markdown |
 | 관리 | `edit_prompt()`, `delete_prompt()`, `show_top()` | 수정, 삭제, Top 목록 |
 
+## 실행 화면 (Claude Code 터미널)
+
+| 화면 | 파일 |
+|---|---|
+| Python/Git 버전, user.name/email, 샘플 저장소 clone | [01_env.png](docs/screenshots/01_env.png) |
+| 메뉴 출력, 잘못된 입력, 프롬프트 추가, 목록 | [02_menu_add_list.png](docs/screenshots/02_menu_add_list.png) |
+| 카테고리별 조회, 키워드 검색 | [03_category_search.png](docs/screenshots/03_category_search.png) |
+| 즐겨찾기 추가/해제, 상세 보기 | [04_favorite_detail.png](docs/screenshots/04_favorite_detail.png) |
+| 보너스: 조회수 Top, 수정, 삭제, JSON 저장, Markdown 내보내기 | [05_bonus.png](docs/screenshots/05_bonus.png) |
+| 브랜치 생성/병합 기록 (`git log --graph`) | [06_git_graph.png](docs/screenshots/06_git_graph.png) |
+
+![환경 확인](docs/screenshots/01_env.png)
+![git log graph](docs/screenshots/06_git_graph.png)
+
 ## Git 작업 기록
 
 기능 단위로 브랜치를 나눠 작업하고 `--no-ff`로 병합했습니다
