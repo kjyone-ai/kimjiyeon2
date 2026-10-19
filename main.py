@@ -369,6 +369,57 @@ def export_markdown(prompts):
     print(f"\n{count}개의 Markdown 파일을 내보냈습니다.")
 
 
+def edit_prompt(prompts):
+    """선택한 프롬프트의 제목/내용/카테고리를 수정한다. 빈 입력은 기존 값을 유지한다."""
+    print("\n=== 프롬프트 수정 ===")
+    prompt = select_prompt(prompts)
+    if prompt is None:
+        return
+
+    print("(변경하지 않으려면 Enter)")
+    title = input(f"제목 [{prompt['title']}]: ").strip()
+    if title and title_exists(prompts, title, ignore=prompt):
+        print("이미 같은 제목의 프롬프트가 있어 수정하지 않았습니다.")
+        return
+    content = input("내용 (Enter=유지): ").strip()
+    change_category = input(f"카테고리 [{prompt['category']}] 변경? (y/N): ").strip().lower()
+
+    if title:
+        prompt["title"] = title
+    if content:
+        prompt["content"] = content
+    if change_category == "y":
+        prompt["category"] = choose_category()
+    print("\n프롬프트가 수정되었습니다!")
+
+
+def delete_prompt(prompts):
+    """선택한 프롬프트를 확인 후 삭제한다."""
+    print("\n=== 프롬프트 삭제 ===")
+    prompt = select_prompt(prompts)
+    if prompt is None:
+        return
+
+    answer = input(f"'{prompt['title']}' 프롬프트를 삭제할까요? (y/N): ").strip().lower()
+    if answer != "y":
+        print("삭제를 취소했습니다.")
+        return
+    prompts.remove(prompt)
+    print("삭제되었습니다.")
+
+
+def show_top(prompts):
+    """조회수가 높은 순으로 상위 5개를 출력한다 (조회수 0은 제외)."""
+    print("\n=== 조회수 Top 5 ===")
+    viewed = [p for p in prompts if p["views"] > 0]
+    if not viewed:
+        print("아직 조회된 프롬프트가 없습니다. (상세 보기를 하면 조회수가 올라갑니다)")
+        return
+    ranking = sorted(viewed, key=lambda p: p["views"], reverse=True)[:5]
+    for rank, prompt in enumerate(ranking, start=1):
+        print(f"{rank}위. [{prompt['category']}] {prompt['title']} - {prompt['views']}회")
+
+
 MENU_ITEMS = [
     ("1", "프롬프트 추가", add_prompt),
     ("2", "프롬프트 목록", show_list),
@@ -380,11 +431,14 @@ MENU_ITEMS = [
     ("8", "JSON 저장", save_menu),
     ("9", "JSON 불러오기", load_menu),
     ("10", "Markdown 내보내기", export_markdown),
+    ("11", "프롬프트 수정", edit_prompt),
+    ("12", "프롬프트 삭제", delete_prompt),
+    ("13", "조회수 Top 5", show_top),
 ]
 
 
 # 실행 후 자동 저장이 필요한 메뉴 (추가, 상세 보기(조회수), 즐겨찾기, 수정, 삭제)
-MUTATING_MENUS = {"6", "1", "5"}
+MUTATING_MENUS = {"5", "1", "11", "12", "6"}
 
 
 def main():
